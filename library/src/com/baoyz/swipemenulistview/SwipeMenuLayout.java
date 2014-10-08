@@ -1,8 +1,11 @@
 package com.baoyz.swipemenulistview;
 
 import android.content.Context;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.widget.ScrollerCompat;
+import android.text.method.HideReturnsTransformationMethod;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.TypedValue;
@@ -45,7 +48,7 @@ public class SwipeMenuLayout extends FrameLayout {
 	private int position;
 	private Interpolator mCloseInterpolator;
 	private Interpolator mOpenInterpolator;
-
+    private boolean mScrollEnd =false;
 	public SwipeMenuLayout(View contentView, SwipeMenuView menuView) {
 		this(contentView, menuView, null, null);
 	}
@@ -58,6 +61,8 @@ public class SwipeMenuLayout extends FrameLayout {
 		mContentView = contentView;
 		mMenuView = menuView;
 		mMenuView.setLayout(this);
+
+		mContentView.setBackground(new ColorDrawable(Color.WHITE));
 		init();
 	}
 
@@ -170,6 +175,7 @@ public class SwipeMenuLayout extends FrameLayout {
 		case MotionEvent.ACTION_DOWN:
 			mDownX = (int) event.getX();
 			isFling = false;
+			layoutMenuViewShow();
 			break;
 		case MotionEvent.ACTION_MOVE:
 			// Log.i("byz", "downX = " + mDownX + ", moveX = " + event.getX());
@@ -211,9 +217,6 @@ public class SwipeMenuLayout extends FrameLayout {
 		}
 		mContentView.layout(-dis, mContentView.getTop(),
 				mContentView.getWidth() - dis, getMeasuredHeight());
-		mMenuView.layout(mContentView.getWidth() - dis, mMenuView.getTop(),
-				mContentView.getWidth() + mMenuView.getWidth() - dis,
-				mMenuView.getBottom());
 	}
 
 	@Override
@@ -227,6 +230,10 @@ public class SwipeMenuLayout extends FrameLayout {
 			if (mCloseScroller.computeScrollOffset()) {
 				swipe(mBaseX - mCloseScroller.getCurrX());
 				postInvalidate();
+				mScrollEnd = true;
+			}else if(mScrollEnd){
+				mScrollEnd = false;
+				layoutMenuViewHiden();
 			}
 		}
 	}
@@ -262,6 +269,18 @@ public class SwipeMenuLayout extends FrameLayout {
 		}
 	}
 
+	private void layoutMenuViewHiden(){
+
+		mMenuView.layout(getMeasuredWidth(), 0,
+				getMeasuredWidth() + mMenuView.getMeasuredWidth(),
+				mContentView.getMeasuredHeight());
+	}
+
+	private void layoutMenuViewShow(){
+		mMenuView.layout(getMeasuredWidth() - mMenuView.getMeasuredWidth(), 0,
+				getMeasuredWidth(), mMenuView.getBottom());
+	}
+
 	public View getContentView() {
 		return mContentView;
 	}
@@ -287,11 +306,12 @@ public class SwipeMenuLayout extends FrameLayout {
 	protected void onLayout(boolean changed, int l, int t, int r, int b) {
 		mContentView.layout(0, 0, getMeasuredWidth(),
 				mContentView.getMeasuredHeight());
-		mMenuView.layout(getMeasuredWidth(), 0,
-				getMeasuredWidth() + mMenuView.getMeasuredWidth(),
-				mContentView.getMeasuredHeight());
+		layoutMenuViewHiden();
+//		mMenuView.layout(getMeasuredWidth(), 0,
+//				getMeasuredWidth() + mMenuView.getMeasuredWidth(),
+//				mContentView.getMeasuredHeight());
+		bringChildToFront(mContentView);
 		// setMenuHeight(mContentView.getMeasuredHeight());
-		// bringChildToFront(mContentView);
 	}
 
 	public void setMenuHeight(int measuredHeight) {
