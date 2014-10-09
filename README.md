@@ -178,3 +178,8 @@ listView.setOpenInterpolator(...);
 <p>
    <img src="demo2.gif" width="320" alt="Screenshot"/>
 </p>
+
+# The Changed Effect 
+<p>
+   <img src="demo4.gif" width="320" alt="Screenshot"/>
+</p>
